@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const Mail = require('../models/mail');
 const Schedule = require('../models/schedule');
+const { v4: uuidv4 } = require('uuid');
 
 
 router.get("/", (req, res, next) => {
-    Mail.find().exec()
+    const sender = req.headers.sender;
+    Mail.find({sender: sender}).exec()
         .then(docs => {
             console.log(docs);
             res.status(200).json(docs);
@@ -14,7 +16,7 @@ router.get("/", (req, res, next) => {
         .catch(err => {
             console.log(err);
             res.status(500).json({ error: err })
-        })
+        });
 });
 
 
@@ -34,13 +36,14 @@ router.get("/:mailId", (req, res, next) => {
 
 router.post("/", (req, res, next) => {
     const type = req.body.type;
-    const mailId = mongoose.Types.ObjectId();
+    const mailId = uuidv4().toString();
 
     const mail = new Mail({
         _id: mailId,
         sender: req.body.sender,
         to: req.body.to,
         cc: req.body.cc,
+        bcc: req.body.bcc,
         subject: req.body.subject,
         body: req.body.body,
         type: type,
@@ -140,19 +143,55 @@ router.patch("/:mailId", (req, res, next) => {
 })
 
 
-router.delete("/:mailId", (req, res, next) => {
+router.delete("/:mailId", async (req, res, next) => {
     const mailId = req.params.mailId;
-    Mail.remove({ _id: mailId }).exec()
-        .then(result => {
-            res.status(200).json({
-                message: "Mail deleted successfully"
-            })
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            })
+    Schedule.find().exec()
+        .then(docs => {
+            const schedule = docs[0];
+            Mail.findById(mailId).exec()
+                .then(mail => {
+                    console.log(mail);
+                    const type = mail.type;
+                    if (type == "30secs") {
+                        var arr = schedule["_30secs"];
+                        arr = arr.filter(item => item != mailId)
+                        schedule["_30secs"] = arr;
+
+                    }
+                    else if (type == "Weekly" || type == "Monthly") {
+                        const day_or_date = (type == "Weekly") ? mail.day : mail.date;
+                        const time = mail.time;
+                        var arr = schedule[type][day_or_date][time];
+                        arr = arr.filter(item => item != mailId);
+                        schedule[type][day_or_date][time] = arr;
+                    }
+                    else {
+                        const month = mail.month;
+                        const date = mail.date;
+                        const time = mail.time;
+                        var arr = schedule[type][month][date][time];
+                        arr = arr.filter(item => item != mailId);
+                        schedule[type][month][date][time] = arr;
+                        console.log(schedule[type][month][date][time])
+                    }
+                    Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
+                        .then(() => {
+                            console.log("Removed from schedule")
+                            Mail.remove({ _id: mailId }).exec()
+                                .then(result => {
+                                    res.status(200).json({
+                                        message: "Mail deleted successfully"
+                                    })
+                                })
+                                .catch(err => {
+                                    console.log(err);
+                                    res.status(500).json({
+                                        error: err
+                                    });
+                                });
+                        })
+                        .catch((err) => console.log(err))
+                })
         });
 });
 
