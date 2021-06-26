@@ -15,7 +15,20 @@ router.get("/", (req, res, next) => {
             console.log(err);
             res.status(500).json({ error: err })
         })
+});
 
+
+router.get("/:mailId", (req, res, next) => {
+    const mailId = req.params.mailId;
+    Mail.findById(mailId).exec()
+        .then(mail => {
+            console.log(mail);
+            res.status(200).json(mail);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({ error: err })
+        })
 });
 
 
@@ -26,7 +39,7 @@ router.post("/", (req, res, next) => {
     const mail = new Mail({
         _id: mailId,
         sender: req.body.sender,
-        to: req.body.receivers,
+        to: req.body.to,
         cc: req.body.cc,
         subject: req.body.subject,
         body: req.body.body,
@@ -104,7 +117,43 @@ router.post("/", (req, res, next) => {
                     .catch(err => res.status(500).json({ error: err }))
             }
         })
+});
 
+
+router.patch("/:mailId", (req, res, next) => {
+    const mailId = req.params.mailId;
+    updateProps = {}
+    req.body.forEach(prop => {
+        updateProps[prop.propName] = prop.value;
+    });
+    Mail.updateOne({ _id: mailId }, { $set: updateProps }).exec()
+        .then(result => {
+            res.status(200).json({
+                message: "Mail updated successfully"
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+})
+
+
+router.delete("/:mailId", (req, res, next) => {
+    const mailId = req.params.mailId;
+    Mail.remove({ _id: mailId }).exec()
+        .then(result => {
+            res.status(200).json({
+                message: "Mail deleted successfully"
+            })
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            })
+        });
 });
 
 module.exports = router;

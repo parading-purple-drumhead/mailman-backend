@@ -19,17 +19,6 @@ mongoose.connect(
   { useNewUrlParser: true }
 );
 
-const task = cron.schedule('*/5 * * * * *',()=>{
-    Schedule.find().exec()
-    .then((docs)=>{
-        console.log(docs[0]["_30secs"])
-        const schedule = docs[0]
-
-    })
-    // console.log("time")
-})
-task.start()
-
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cors());
