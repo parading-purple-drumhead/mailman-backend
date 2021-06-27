@@ -4,6 +4,7 @@ const router = express.Router();
 const Mail = require('../models/mail');
 const Schedule = require('../models/schedule');
 const { v4: uuidv4 } = require('uuid');
+const User = require('../models/user');
 
 
 router.get("/", (req, res, next) => {
@@ -37,34 +38,38 @@ router.get("/:mailId", (req, res, next) => {
 router.post("/", (req, res, next) => {
     const type = req.body.type;
     const mailId = uuidv4().toString();
+    const sender = req.body.sender;
 
-    const mail = new Mail({
-        _id: mailId,
-        sender: req.body.sender,
-        displayName: req.body.displayName,
-        to: req.body.to,
-        cc: req.body.cc,
-        bcc: req.body.bcc,
-        subject: req.body.subject,
-        body: req.body.body,
-        type: type,
-        time: req.body.time,
-        day: req.body.day,
-        date: req.body.date,
-        month: req.body.month,
-        last_sent: ""
-    });
-
-    mail.save()
-        .then(result => {
-            console.log("Mail added successfully");
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json({
-                error: err
-            })
+    User.findById(sender).exec()
+    .then((user)=>{
+        const mail = new Mail({
+            _id: mailId,
+            sender: sender,
+            displayName: user.displayName,
+            to: req.body.to,
+            cc: req.body.cc,
+            bcc: req.body.bcc,
+            subject: req.body.subject,
+            body: req.body.body,
+            type: type,
+            time: req.body.time,
+            day: req.body.day,
+            date: req.body.date,
+            month: req.body.month,
+            last_sent: ""
         });
+    
+        mail.save()
+            .then(result => {
+                console.log("Mail added successfully");
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(500).json({
+                    error: err
+                })
+            });        
+    })
 
     Schedule.find().exec()
         .then(docs => {
