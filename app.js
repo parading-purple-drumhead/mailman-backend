@@ -76,11 +76,11 @@ const task = cron.schedule("*/30 * * * * *", () => {
               subject: mail.subject,
               text: mail.body,
             };
-            // nodemailer.sendmail(params).then(() => {
-            //   const last_sent = moment().format("dddd HH:mm, Do MMM");
-            //   Mail.updateOne({ _id: id }, { last_sent: last_sent }).exec()
-            //     .then(() => { console.log("Last sent time updated") })
-            // });
+            nodemailer.sendmail(params).then(() => {
+              const last_sent = moment().format("dddd HH:mm, Do MMM");
+              Mail.updateOne({ _id: id }, { last_sent: last_sent }).exec()
+                .then(() => { console.log("Last sent time updated") })
+            });
           });
       });
     });
