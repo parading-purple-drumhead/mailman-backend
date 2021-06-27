@@ -13,6 +13,8 @@ const app = express();
 
 const mailsRoute = require("./api/routes/mails");
 
+const userRoute = require("./api/routes/users");
+
 mongoose.connect(
   "mongodb+srv://basu:" +
   process.env.MONGO_ATLAS_PWD +
@@ -90,6 +92,8 @@ mongoose.connect(
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cors());
+
+app.use("/users", userRoute)
 
 app.use("/mails", mailsRoute);
 
