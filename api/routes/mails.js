@@ -41,91 +41,91 @@ router.post("/", (req, res, next) => {
     const sender = req.body.sender;
 
     User.findById(sender).exec()
-    .then((user)=>{
-        const mail = new Mail({
-            _id: mailId,
-            sender: sender,
-            displayName: user.displayName,
-            to: req.body.to,
-            cc: req.body.cc,
-            bcc: req.body.bcc,
-            subject: req.body.subject,
-            body: req.body.body,
-            type: type,
-            time: req.body.time,
-            day: req.body.day,
-            date: req.body.date,
-            month: req.body.month,
-            last_sent: ""
-        });
-    
-        mail.save()
-            .then(result => {
-                console.log("Mail added successfully");
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).json({
-                    error: err
-                })
-            });        
-    })
+        .then((user) => {
+            const mail = new Mail({
+                _id: mailId,
+                sender: sender,
+                displayName: user.displayName,
+                to: req.body.to,
+                cc: req.body.cc,
+                bcc: req.body.bcc,
+                subject: req.body.subject,
+                body: req.body.body,
+                type: type,
+                time: req.body.time,
+                day: req.body.day,
+                date: req.body.date,
+                month: req.body.month,
+                last_sent: ""
+            });
 
-    Schedule.find().exec()
-        .then(docs => {
-            var schedule = docs[0];
-            console.log(schedule)
-            if (type == "30secs") {
-                schedule["_30secs"].push(mailId);
-                Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
-                    .then(result => res.status(200).json({ message: "Mail scheduled for every 30 seconds" }))
-                    .catch(err => res.status(500).json({ error: err }))
-            }
-            else if (type == "Weekly" || type == "Monthly") {
-                const day_or_date = (type == "Weekly") ? mail["day"] : mail["date"];
-                const time = mail["time"];
-                if (schedule[type][day_or_date] == undefined) {
-                    schedule[type][day_or_date] = {}
-                    schedule[type][day_or_date][time] = [mailId]
-                    console.log(schedule[type][day_or_date][time])
-                    console.log("Updated 1:", schedule)
-                }
-                else {
-                    if (schedule[type][day_or_date][time] == undefined) {
-                        schedule[type][day_or_date][time] = [mailId]
-                        console.log("Updated 2:", schedule)
+            mail.save()
+                .then(result => {
+                    console.log("Mail added successfully");
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({
+                        error: err
+                    })
+                });
+
+            Schedule.find().exec()
+                .then(docs => {
+                    var schedule = docs[0];
+                    console.log(schedule)
+                    if (type == "30secs") {
+                        schedule["_30secs"].push(mailId);
+                        Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
+                            .then(result => res.status(200).json({ message: "Mail scheduled for every 30 seconds" }))
+                            .catch(err => res.status(500).json({ error: err }))
                     }
-                    else {
-                        schedule[type][day_or_date][time].push(mailId)
-                        console.log("Updated 3:", schedule)
+                    else if (type == "Weekly" || type == "Monthly") {
+                        const day_or_date = (type == "Weekly") ? mail["day"] : mail["date"];
+                        const time = mail["time"];
+                        if (schedule[type][day_or_date] == undefined) {
+                            schedule[type][day_or_date] = {}
+                            schedule[type][day_or_date][time] = [mailId]
+                            console.log(schedule[type][day_or_date][time])
+                            console.log("Updated 1:", schedule)
+                        }
+                        else {
+                            if (schedule[type][day_or_date][time] == undefined) {
+                                schedule[type][day_or_date][time] = [mailId]
+                                console.log("Updated 2:", schedule)
+                            }
+                            else {
+                                schedule[type][day_or_date][time].push(mailId)
+                                console.log("Updated 3:", schedule)
+                            }
+                        }
+                        Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
+                            .then(result => res.status(200).json({ message: "Mail scheduled for every week/month" }))
+                            .catch(err => res.status(500).json({ error: err }))
                     }
-                }
-                Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
-                    .then(result => res.status(200).json({ message: "Mail scheduled for every week/month" }))
-                    .catch(err => res.status(500).json({ error: err }))
-            }
-            else if (type == "Yearly") {
-                const month = req.body.month;
-                const date = req.body.date;
-                const time = req.body.time;
-                if (schedule[type][month] == undefined) {
-                    schedule[type][month] = {}
-                    schedule[type][month][date] = {}
-                    schedule[type][month][date][time] = [mailId]
-                } else if (schedule[type][month][date] == undefined) {
-                    schedule[type][month][date] = {}
-                    schedule[type][month][date][time] = [mailId]
-                }
-                else if (schedule[type][month][date][time] == undefined) {
-                    schedule[type][month][date][time] = [mailId]
-                }
-                else {
-                    schedule[type][month][date][time].push(mailId)
-                }
-                Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
-                    .then(result => res.status(200).json({ message: "Mail scheduled for every year" }))
-                    .catch(err => res.status(500).json({ error: err }))
-            }
+                    else if (type == "Yearly") {
+                        const month = req.body.month;
+                        const date = req.body.date;
+                        const time = req.body.time;
+                        if (schedule[type][month] == undefined) {
+                            schedule[type][month] = {}
+                            schedule[type][month][date] = {}
+                            schedule[type][month][date][time] = [mailId]
+                        } else if (schedule[type][month][date] == undefined) {
+                            schedule[type][month][date] = {}
+                            schedule[type][month][date][time] = [mailId]
+                        }
+                        else if (schedule[type][month][date][time] == undefined) {
+                            schedule[type][month][date][time] = [mailId]
+                        }
+                        else {
+                            schedule[type][month][date][time].push(mailId)
+                        }
+                        Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
+                            .then(result => res.status(200).json({ message: "Mail scheduled for every year" }))
+                            .catch(err => res.status(500).json({ error: err }))
+                    }
+                })
         })
 });
 
@@ -159,7 +159,7 @@ router.patch("/:mailId", (req, res, next) => {
                         var arr = schedule[type][month][date][time];
                         arr = arr.filter(item => item != mailId);
                         schedule[type][month][date][time] = arr;
-                        console.log("Line 155:",schedule[type][month][date][time])
+                        console.log("Line 155:", schedule[type][month][date][time])
                     }
                     Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
                         .then(() => {
@@ -192,7 +192,7 @@ router.patch("/:mailId", (req, res, next) => {
                                 schedule[type][day_or_date][time].push(mailId)
                             }
                         }
-                        console.log("Line 188:",schedule[type][day_or_date][time])
+                        console.log("Line 188:", schedule[type][day_or_date][time])
                         Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
                             .then(result => console.log("Mail scheduled for every week/month"))
                             .catch(err => console.log(err))
@@ -215,7 +215,7 @@ router.patch("/:mailId", (req, res, next) => {
                         else {
                             schedule[type][month][date][time].push(mailId)
                         }
-                        console.log("Line 211:",schedule[type][month][date][time])
+                        console.log("Line 211:", schedule[type][month][date][time])
                         Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
                             .then(result => console.log("Mail scheduled for every year"))
                             .catch(err => console.log(err))
