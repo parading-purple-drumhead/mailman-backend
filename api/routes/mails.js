@@ -11,11 +11,11 @@ router.get("/", (req, res, next) => {
     const sender = req.headers.sender;
     Mail.find({ sender: sender }).exec()
         .then(docs => {
-            console.log(docs);
+
             res.status(200).json(docs);
         })
         .catch(err => {
-            console.log(err);
+            console.error(err);
             res.status(500).json({ error: err })
         });
 });
@@ -25,11 +25,11 @@ router.get("/:mailId", (req, res, next) => {
     const mailId = req.params.mailId;
     Mail.findById(mailId).exec()
         .then(mail => {
-            console.log(mail);
+
             res.status(200).json(mail);
         })
         .catch(err => {
-            console.log(err);
+            console.error(err);
             res.status(500).json({ error: err })
         })
 });
@@ -64,7 +64,7 @@ router.post("/", (req, res, next) => {
                     console.log("Mail added successfully");
                 })
                 .catch(err => {
-                    console.log(err);
+                    console.error(err);
                     res.status(500).json({
                         error: err
                     })
@@ -73,7 +73,7 @@ router.post("/", (req, res, next) => {
             Schedule.find().exec()
                 .then(docs => {
                     var schedule = docs[0];
-                    console.log(schedule)
+                    
                     if (type == "30secs") {
                         schedule["_30secs"].push(mailId);
                         Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
@@ -86,17 +86,17 @@ router.post("/", (req, res, next) => {
                         if (schedule[type][day_or_date] == undefined) {
                             schedule[type][day_or_date] = {}
                             schedule[type][day_or_date][time] = [mailId]
-                            console.log(schedule[type][day_or_date][time])
-                            console.log("Updated 1:", schedule)
+                            
+                            
                         }
                         else {
                             if (schedule[type][day_or_date][time] == undefined) {
                                 schedule[type][day_or_date][time] = [mailId]
-                                console.log("Updated 2:", schedule)
+                                
                             }
                             else {
                                 schedule[type][day_or_date][time].push(mailId)
-                                console.log("Updated 3:", schedule)
+                                
                             }
                         }
                         Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
@@ -159,13 +159,13 @@ router.patch("/:mailId", (req, res, next) => {
                         var arr = schedule[type][month][date][time];
                         arr = arr.filter(item => item != mailId);
                         schedule[type][month][date][time] = arr;
-                        console.log("Line 155:", schedule[type][month][date][time])
+                        
                     }
                     Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
                         .then(() => {
                             console.log("Removed from schedule")
                         })
-                        .catch((err) => console.log(err))
+                        .catch((err) => console.error(err))
                 })
 
                 //Updating new schedule
@@ -175,7 +175,7 @@ router.patch("/:mailId", (req, res, next) => {
                         schedule["_30secs"].push(mailId);
                         Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
                             .then(result => console.log("Mail scheduled for every 30 seconds"))
-                            .catch(err => console.log(err))
+                            .catch(err => console.error(err))
                     }
                     else if (type == "Weekly" || type == "Monthly") {
                         const day_or_date = (type == "Weekly") ? newMail["day"] : newMail["date"];
@@ -192,10 +192,10 @@ router.patch("/:mailId", (req, res, next) => {
                                 schedule[type][day_or_date][time].push(mailId)
                             }
                         }
-                        console.log("Line 188:", schedule[type][day_or_date][time])
+                        
                         Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
                             .then(result => console.log("Mail scheduled for every week/month"))
-                            .catch(err => console.log(err))
+                            .catch(err => console.error(err))
                     }
                     else if (type == "Yearly") {
                         const month = newMail.month;
@@ -215,10 +215,10 @@ router.patch("/:mailId", (req, res, next) => {
                         else {
                             schedule[type][month][date][time].push(mailId)
                         }
-                        console.log("Line 211:", schedule[type][month][date][time])
+                        
                         Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
                             .then(result => console.log("Mail scheduled for every year"))
-                            .catch(err => console.log(err))
+                            .catch(err => console.error(err))
                     }
                 })
 
@@ -247,7 +247,7 @@ router.delete("/:mailId", async (req, res, next) => {
             const schedule = docs[0];
             Mail.findById(mailId).exec()
                 .then(mail => {
-                    console.log(mail);
+
                     const type = mail.type;
                     if (type == "30secs") {
                         var arr = schedule["_30secs"];
@@ -269,11 +269,11 @@ router.delete("/:mailId", async (req, res, next) => {
                         var arr = schedule[type][month][date][time];
                         arr = arr.filter(item => item != mailId);
                         schedule[type][month][date][time] = arr;
-                        console.log(schedule[type][month][date][time])
+                        
                     }
                     Schedule.updateOne({ _id: schedule["_id"] }, { $set: schedule }).exec()
                         .then(() => {
-                            console.log("Removed from schedule")
+                            
                             Mail.remove({ _id: mailId }).exec()
                                 .then(result => {
                                     res.status(200).json({
@@ -281,13 +281,13 @@ router.delete("/:mailId", async (req, res, next) => {
                                     })
                                 })
                                 .catch(err => {
-                                    console.log(err);
+                                    console.error(err);
                                     res.status(500).json({
                                         error: err
                                     });
                                 });
                         })
-                        .catch((err) => console.log(err))
+                        .catch((err) => console.error(err))
                 })
         });
 });

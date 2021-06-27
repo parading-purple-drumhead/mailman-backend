@@ -31,7 +31,7 @@ const task = cron.schedule("*/30 * * * * *", () => {
       const day = moment().format("dddd");
       const time = moment().format("HH:mm");
       const sec = moment().format("ss");
-      console.log(sec);
+
       const sendMailIds = [];
       const schedule = docs[0];
       schedule["_30secs"].forEach((mailid) => {
@@ -63,7 +63,7 @@ const task = cron.schedule("*/30 * * * * *", () => {
           }
         }
       }
-      console.log(sendMailIds);
+
       sendMailIds.forEach((id) => {
         Mail.findById(id)
           .exec()
@@ -84,7 +84,7 @@ const task = cron.schedule("*/30 * * * * *", () => {
           });
       });
     });
-  // console.log("time")
+  // 
 });
 task.start();
 
