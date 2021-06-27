@@ -12,7 +12,6 @@ var moment = require("moment");
 const app = express();
 
 const mailsRoute = require("./api/routes/mails");
-
 const userRoute = require("./api/routes/users");
 
 mongoose.connect(
@@ -93,8 +92,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(cors());
 
-app.use("/users", userRoute)
-
+app.use("/users", userRoute);
 app.use("/mails", mailsRoute);
 
 app.use("/sendmail", (req, res, next) => {
