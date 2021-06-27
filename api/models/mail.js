@@ -4,6 +4,7 @@ const mailSchema = mongoose.Schema({
     // _id: mongoose.Schema.Types.ObjectId,
     _id: {type: String, required: true},
     sender: { type: String, required: true },
+    displayName: { type: String, required: true },
     to: { type: [String], required: true },
     cc: { type: [String], required: true },
     bcc: { type: [String], required: true },

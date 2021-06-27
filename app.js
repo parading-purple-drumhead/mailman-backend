@@ -15,8 +15,8 @@ const mailsRoute = require("./api/routes/mails");
 
 mongoose.connect(
   "mongodb+srv://basu:" +
-    process.env.MONGO_ATLAS_PWD +
-    "@mailman-db.xrpii.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+  process.env.MONGO_ATLAS_PWD +
+  "@mailman-db.xrpii.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
   { useNewUrlParser: true }
 
 );
@@ -28,7 +28,7 @@ mongoose.connect(
 //       const month = moment().format("MMM");
 //       const date = moment().format("_DD");
 //       const day = moment().format("dddd");
-//       const time = moment().format("HH:MM");
+//       const time = moment().format("HH:mm");
 //       const sec = moment().format("ss");
 //       console.log(sec);
 //       const sendMailIds = [];
@@ -68,13 +68,18 @@ mongoose.connect(
 //           .exec()
 //           .then((mail) => {
 //             var params = {
-//               from: "iota-hackathon@outlook.com",
+//               from: `"${mail.displayName}"<iota-hackathon@outlook.com>`,
 //               to: mail.to,
 //               cc: mail.cc,
+//               bcc: mail.bcc,
 //               subject: mail.subject,
 //               text: mail.body,
 //             };
-//             nodemailer.sendmail(params);
+//             // nodemailer.sendmail(params).then(() => {
+//             //   const last_sent = moment().format("dddd HH:mm, Do MMM");
+//             //   Mail.updateOne({ _id: id }, { last_sent: last_sent }).exec()
+//             //     .then(() => { console.log("Last sent time updated") })
+//             // });
 //           });
 //       });
 //     });

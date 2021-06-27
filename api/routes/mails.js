@@ -41,6 +41,7 @@ router.post("/", (req, res, next) => {
     const mail = new Mail({
         _id: mailId,
         sender: req.body.sender,
+        displayName: req.body.displayName,
         to: req.body.to,
         cc: req.body.cc,
         bcc: req.body.bcc,
@@ -50,7 +51,8 @@ router.post("/", (req, res, next) => {
         time: req.body.time,
         day: req.body.day,
         date: req.body.date,
-        month: req.body.month
+        month: req.body.month,
+        last_sent: ""
     });
 
     mail.save()

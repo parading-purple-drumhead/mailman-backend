@@ -12,17 +12,19 @@ async function sendmail(params) {
     },
   });
   let info = await transporter.sendMail(
-      params
+    params
     // from: "iota-hackathon@outlook.com", // sender address
     // to: "sudhanshubroy@gmail.com", // list of receivers
     // subject: "Hello", // Subject line
     // text: "Hello world?"
   );
-  
+
   console.log("Message sent: %s", info.messageId);
 
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+
+  
 }
 
 
-module.exports = {sendmail}
+module.exports = { sendmail }
