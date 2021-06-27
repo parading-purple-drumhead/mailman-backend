@@ -26,11 +26,11 @@ const task = cron.schedule("*/30 * * * * *", () => {
   Schedule.find()
     .exec()
     .then((docs) => {
-      const month = moment().format("MMM");
-      const date = moment().format("_DD");
-      const day = moment().format("dddd");
-      const time = moment().format("HH:mm");
-      const sec = moment().format("ss");
+      const month = moment().utcOffset(330).format("MMM");
+      const date = moment().utcOffset(330).format("_DD");
+      const day = moment().utcOffset(330).format("dddd");
+      const time = moment().utcOffset(330).format("HH:mm");
+      const sec = moment().utcOffset(330).format("ss");
 
       const sendMailIds = [];
       const schedule = docs[0];
@@ -77,7 +77,7 @@ const task = cron.schedule("*/30 * * * * *", () => {
               text: mail.body,
             };
             nodemailer.sendmail(params).then(() => {
-              const last_sent = moment().format("dddd HH:mm, Do MMM");
+              const last_sent = moment().utcOffset(330).format("dddd HH:mm, Do MMM");
               Mail.updateOne({ _id: id }, { last_sent: last_sent }).exec()
                 .then(() => { console.log("Last sent time updated") })
             });
